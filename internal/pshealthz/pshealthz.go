@@ -22,9 +22,9 @@ type Request struct {
 }
 
 type Response struct {
-	OK        bool        `json:"ok"`
-	Message   *string     `json:"message,omitempty"`
-	Processes *[]*Process `json:"processes,omitempty"`
+	OK        bool       `json:"ok"`
+	Message   string     `json:"message,omitempty"`
+	Processes []*Process `json:"processes,omitempty"`
 }
 
 type Process struct {
@@ -35,7 +35,7 @@ type Process struct {
 func NewErrorResponse(message string) string {
 	res := &Response{
 		OK:      false,
-		Message: &message,
+		Message: message,
 	}
 
 	resBytes, err := json.Marshal(res)
@@ -71,7 +71,7 @@ func PSHealthz(w http.ResponseWriter, r *http.Request) {
 
 	res := &Response{
 		OK:        true,
-		Processes: &[]*Process{},
+		Processes: []*Process{},
 	}
 	for _, entry := range entries {
 		if entry.IsDir() && regexNumbers.MatchString(entry.Name()) {
@@ -86,14 +86,14 @@ func PSHealthz(w http.ResponseWriter, r *http.Request) {
 				continue
 			}
 
-			*res.Processes = append(*res.Processes, &Process{
+			res.Processes = append(res.Processes, &Process{
 				PID:     entry.Name(),
 				Cmdline: string(sanitized),
 			})
 		}
 	}
 
-	if len(*res.Processes) != 0 {
+	if len(res.Processes) != 0 {
 		resBytes, err := json.Marshal(res)
 		if err != nil {
 			http.Error(w, NewErrorResponse("failed to marshal response"), http.StatusInternalServerError)
